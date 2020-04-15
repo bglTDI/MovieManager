@@ -92,14 +92,16 @@ if action == '1':
 	print("You chose to watch")
 	print(contenders.to_string())
 
-if action == 2:
+if action == '2':
 	active_flg = 1
-	df_tmp = read_csv('Data/Suggested Movies.csv')
+	df_tmp = pd.read_csv('Data/Suggested Movies.csv')
 
 	if user:
 		submitter = 'C'
 	else:
 		submitter = 'B'
+
+	# print('Got Here')
 
 	while active_flg:
 
@@ -108,33 +110,33 @@ if action == 2:
 		
 		print('Intensity(l/h): ')
 		intensity = input()
-		while re.search([^lLhHxX], intensity):
+		while re.search('[^lLhHxX]', intensity):
 			print('Invalid input. Try again or enter X to exit.')
 			print('Intensity(l/h): ')
-			if re.search([xX], input()):
-       			df_tmp.to_csv('Data/Suggested Movies.csv')
+			if re.search('[xX]', input()):
+				df_tmp.to_csv('Data/Suggested Movies.csv')
 				break
-			elif re.search([lL], input()):
+			elif re.search('[lL]', input()):
 				intensity = 0
-			elif re.search([hH], input()):
+			elif re.search('[hH]', input()):
 				intensity = 1
 			
 
 		submission = {'Movie': title, 'Intense': intensity, 'submitter': submitter}
-        df_tmp = df_tmp.append(submission, ignore_index=True)
+		df_tmp = df_tmp.append(submission, ignore_index=True)
 
-        print('Continue submitting? (y/n)')
-        while re.search([^nNyY], input()):
-        	print('Invalid input. Try again.')
-       	if re.search([nN], input()):
-       		active_flg = 0
-       		df_tmp.to_csv('Data/Suggested Movies.csv')
+		print('Continue submitting? (y/n)')
+		while re.search('[^nNyY]', input()):
+			print('Invalid input. Try again.')
+		if re.search('[nN]', input()):
+			active_flg = 0
+			df_tmp.to_csv('Data/Suggested Movies.csv')
 
 
-if action == 3:
+if action == '3':
 
 	df = pd.read_csv('Data/Movie List.csv')
-	df_tmp = read_csv('Data/Suggested Movies.csv')
+	df_tmp = pd.read_csv('Data/Suggested Movies.csv')
 
 	print('y: Approve\nn: Reject\ns: Skip\n x: Exit')
 
@@ -148,8 +150,8 @@ if action == 3:
 
 		for movie in review:
 			print(movie.to_string())
-			while re.search([^nNyYsSxX], input()):
-        		print('Invalid input. Try again.')
-       		if re.search([xX], input()):
-       			df.to_csv('Data/Movie List.csv')
-       			df_tmp.to_csv('Data/Suggested Movies.csv')
+			while re.search('[^nNyYsSxX]', input()):
+				print('Invalid input. Try again.')
+				if re.search([xX], input()):
+					df.to_csv('Data/Movie List.csv')
+					df_tmp.to_csv('Data/Suggested Movies.csv')
