@@ -42,7 +42,7 @@ if action == '1':
 	print('How many contenders?')
 	num_to_draw=int(input())
 
-	df=pd.read_excel('Data/Movie List.xlsx')
+	df=pd.read_csv('Data/Movie List.csv')
 	print('Would you like to filter by Intensity? Y/N')
 	filter_flg = input().lower()[0]
 
@@ -89,6 +89,30 @@ if action == '1':
 	print(contenders.to_string())
 
 
+if action == '4':
+	df=pd.read_csv('Data/Movie List.csv')
+	to_del_flag = True
+
+	while to_del_flag:
+		print('Here are the movies:')
+		print()
+		print(df.to_string())
+
+		to_del = input('Enter the index of the movie to delete ')
+
+		try:
+			to_del = int(to_del)
+			df = df.drop( index = to_del )
+				
+			del_again = input('Delete Another? Y/N ')
+
+			if del_again.lower()[0] == 'n':
+				to_del_flag = False
+
+		except:
+			pass
+
+	df.to_csv('Data/Movie List.csv')
 
 
 
