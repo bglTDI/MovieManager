@@ -56,10 +56,21 @@ if action == '1':
 
 		if filter_choice == 'l':
 			df_low = df[df.Intense == 0]
+			while num_to_draw > len(df_low):
+				print(f'Error: contender count greater than available movies {len(df_low)}')
+				print('How many contenders?')
+				num_to_draw=int(input())
+
 			contenders = df_low.sample(num_to_draw)
+
 
 		elif filter_choice == 'h':
 			df_high = df[df.Intense == 1] 
+			while num_to_draw > len(df_high):
+				print(f'Error: contender count greater than available movies {len(df_high)}')
+				print('How many contenders?')
+				num_to_draw=int(input())
+
 			contenders = df_high.sample(num_to_draw)
 		else: 
 			print('Invalid Response')
@@ -67,6 +78,11 @@ if action == '1':
 			raise NotImplementedError
 
 	else:
+		while num_to_draw > len(df):
+			print(f'Error: contender count greater than available movies {len(df)}')
+			print('How many contenders?')
+			num_to_draw=int(input())
+
 		contenders = df.sample(num_to_draw)
 
 	while contenders.shape[0] > 1:
@@ -94,14 +110,17 @@ if action == '1':
 
 if action == '2':
 	active_flg = 1
-	df_tmp = pd.read_csv('Data/Suggested Movies.csv')
+	change_flg = 0
+
+	try:
+		df_tmp = pd.read_csv('Data/Suggested Movies.csv')
+	except:
+		df_tmp = pd.DataFrame(columns=['Movie', 'Intense', 'submitter'])
 
 	if user:
 		submitter = 'C'
 	else:
 		submitter = 'B'
-
-	# print('Got Here')
 
 	while active_flg:
 
@@ -109,49 +128,121 @@ if action == '2':
 		title = input()
 		
 		print('Intensity(l/h): ')
-		intensity = input()
-		while re.search('[^lLhHxX]', intensity):
+		inp = input()
+
+		while re.search('[^lLhHxX]', inp):
 			print('Invalid input. Try again or enter X to exit.')
 			print('Intensity(l/h): ')
-			if re.search('[xX]', input()):
-				df_tmp.to_csv('Data/Suggested Movies.csv')
-				break
-			elif re.search('[lL]', input()):
-				intensity = 0
-			elif re.search('[hH]', input()):
-				intensity = 1
+			inp = input()
 			
-
-		submission = {'Movie': title, 'Intense': intensity, 'submitter': submitter}
-		df_tmp = df_tmp.append(submission, ignore_index=True)
-
-		print('Continue submitting? (y/n)')
-		while re.search('[^nNyY]', input()):
-			print('Invalid input. Try again.')
-		if re.search('[nN]', input()):
+		if re.search('[xX]', inp):
 			active_flg = 0
-			df_tmp.to_csv('Data/Suggested Movies.csv')
 
+		elif re.search('[lL]', inp):
+			intensity = 0
+			change_flg = 1
+
+		elif re.search('[hH]', inp):
+			intensity = 1
+			change_flg = 1
+
+		if active_flg:
+			submission = {'Movie': title, 'Intense': intensity, 'submitter': submitter}
+			df_tmp = df_tmp.append(submission, ignore_index=True)
+
+			print('Continue submitting? (y/n)')
+			inp = input()
+
+			while re.search('[^nNyY]', inp):
+				print('Invalid input. Try again. (y/n)')
+				inp = input()
+
+			if re.search('[nN]', inp):
+				active_flg = 0
+		
+	if change_flg:
+		df_tmp.to_csv('Data/Suggested Movies.csv')
+		print('Suggested Movies updated.')
 
 if action == '3':
 
-	df = pd.read_csv('Data/Movie List.csv')
-	df_tmp = pd.read_csv('Data/Suggested Movies.csv')
+	active_flg = 1
+	change_flg = 0
 
-	print('y: Approve\nn: Reject\ns: Skip\n x: Exit')
+	try:
+		df = pd.read_csv('Data/Movie List.csv')
+	except:
+		df = pd.DataFrame(columns=['Movie', 'Intense'])
 
-	if user:
-		review = df[df.submitter=='B']
-	else:
-		review = df[df.submitter=='C']
+	try:
+		df_tmp = pd.read_csv('Data/Suggested Movies.csv')
+	except:
+		print('No movies to be reviewed.')
+		active_flg = 0
 
-	while review.shape[0] > 1:
-		review = review.reset_index().Movie
+	if active_flg:
+		if user:
+			print('Caroline is reviewing')
+			review = df_tmp[df_tmp.submitter=='B'].Movie
+			if len(review) == 0:
+				print('No movies to be reviewed.')
+				active_flg = 0
+		else:
+			print('Ben is reviewing')
+			review = df_tmp[df_tmp.submitter=='C'].Movie
+			if len(review) == 0:
+				print('No movies to be reviewed.')
+				active_flg = 0
 
-		for movie in review:
-			print(movie.to_string())
-			while re.search('[^nNyYsSxX]', input()):
-				print('Invalid input. Try again.')
-				if re.search([xX], input()):
-					df.to_csv('Data/Movie List.csv')
-					df_tmp.to_csv('Data/Suggested Movies.csv')
+	for movie in review:
+			print('y: Approve, n: Reject, s: Skip, x: Exit')
+			
+			print(movie)
+			inp = input()
+
+			while re.search('[^nNyYsSxX]', inp):
+					print('Invalid input. Try again.')
+					
+			if re.search('[xX]', inp):
+					active_flg = 0	
+					break
+
+			elif re.search('[yY]', inp):
+				df_tmp = df_tmp[df_tmp.Movie != movie]
+				approved = df_tmp[df_tmp.Movie == movie]
+				df = pd.concat([df, approved])
+				change_flg = 1
+
+			elif re.search('[nN]', inp):
+				df_tmp = df_tmp[df_tmp.Movie != movie]
+				change_flg = 1
+
+	if change_flg:
+		df.to_csv('Data/Movie List.csv')
+		df_tmp.to_csv('Data/Suggested Movies.csv')
+		print('Suggested Movies and Movie List updated.')
+
+if action == '4':
+	df=pd.read_csv('Data/Movie List.csv')
+	to_del_flag = True
+
+	while to_del_flag:
+		print('Here are the movies:')
+		print()
+		print(df.to_string())
+
+		to_del = input('Enter the index of the movie to delete ')
+
+		try:
+			to_del = int(to_del)
+			df = df.drop( index = to_del )
+				
+			del_again = input('Delete Another? Y/N ')
+
+			if del_again.lower()[0] == 'n':
+				to_del_flag = False
+
+		except:
+			pass
+
+	df.to_csv('Data/Movie List.csv')
