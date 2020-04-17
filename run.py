@@ -110,6 +110,7 @@ if action == '1':
 
 if action == '2':
 	active_flg = 1
+	submit_flg = 0
 	change_flg = 0
 
 	try:
@@ -140,13 +141,37 @@ if action == '2':
 
 		elif re.search('[lL]', inp):
 			intensity = 0
-			change_flg = 1
+			print(f'Title: {title}, Intesity: L\nSubmit? (y/n)')
+			inp = input()
+
+			while re.search('[^yYnNxX]', inp):
+				print('Invalid input. Try again or enter X to exit.')
+				print('Approve? (y/n): ')
+				inp = input()
+
+			if re.search('[xX]', inp):
+				active_flg = 0
+			elif re.search('[yY]', inp):
+				submit_flg = 1
+				change_flg = 1
 
 		elif re.search('[hH]', inp):
 			intensity = 1
-			change_flg = 1
+			print(f'Title: {title}, Intesity: H\nSubmit? (y/n)')
+			inp = input()
 
-		if active_flg:
+			while re.search('[^yYnNxX]', inp):
+				print('Invalid input. Try again or enter X to exit.')
+				print('Approve? (y/n): ')
+				inp = input()
+
+			if re.search('[xX]', inp):
+				active_flg = 0
+			elif re.search('[yY]', inp):
+				submit_flg = 1
+				change_flg = 1
+
+		if active_flg and submit_flg:
 			submission = {'Movie': title, 'Intense': intensity, 'submitter': submitter}
 			df_tmp = df_tmp.append(submission, ignore_index=True)
 
@@ -159,6 +184,8 @@ if action == '2':
 
 			if re.search('[nN]', inp):
 				active_flg = 0
+
+			submit_flag = 0
 		
 	if change_flg:
 		df_tmp.to_csv('Data/Suggested Movies.csv', index=False)
@@ -208,8 +235,8 @@ if action == '3':
 					break
 
 			elif re.search('[yY]', inp):
-				df_tmp = df_tmp[df_tmp.Movie != movie]
 				approved = df_tmp[df_tmp.Movie == movie][['Movie', 'Intense']]
+				df_tmp = df_tmp[df_tmp.Movie != movie]
 				df = pd.concat([df, approved])
 				change_flg = 1
 
