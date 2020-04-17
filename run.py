@@ -56,8 +56,8 @@ if action == '1':
 
 		if filter_choice == 'l':
 			df_low = df[df.Intense == 0]
-			while num_to_draw > len(df_low):
-				print(f'Error: contender count greater than available movies {len(df_low)}')
+			while num_to_draw > df_low.shape[0]:
+				print(f'Error: contender count greater than available movies {df_low.shape[0]}')
 				print('How many contenders?')
 				num_to_draw=int(input())
 
@@ -66,8 +66,8 @@ if action == '1':
 
 		elif filter_choice == 'h':
 			df_high = df[df.Intense == 1] 
-			while num_to_draw > len(df_high):
-				print(f'Error: contender count greater than available movies {len(df_high)}')
+			while num_to_draw > df_high.shape[0]:
+				print(f'Error: contender count greater than available movies {df_high.shape[0]}')
 				print('How many contenders?')
 				num_to_draw=int(input())
 
@@ -78,8 +78,8 @@ if action == '1':
 			raise NotImplementedError
 
 	else:
-		while num_to_draw > len(df):
-			print(f'Error: contender count greater than available movies {len(df)}')
+		while num_to_draw > df.shape[0]:
+			print(f'Error: contender count greater than available movies {df.shape[0]}')
 			print('How many contenders?')
 			num_to_draw=int(input())
 
@@ -98,7 +98,7 @@ if action == '1':
 			print('Elimate which contender?')
 			to_kill=int(input())
 
-			if 0 <= to_kill and to_kill <=contenders.shape[0]:
+			if 0 <= to_kill and to_kill < contenders.shape[0]:
 				valid_kill = True
 				contenders=contenders.drop(to_kill)
 			else:
@@ -161,7 +161,7 @@ if action == '2':
 				active_flg = 0
 		
 	if change_flg:
-		df_tmp.to_csv('Data/Suggested Movies.csv')
+		df_tmp.to_csv('Data/Suggested Movies.csv', index=False)
 		print('Suggested Movies updated.')
 
 if action == '3':
@@ -209,7 +209,7 @@ if action == '3':
 
 			elif re.search('[yY]', inp):
 				df_tmp = df_tmp[df_tmp.Movie != movie]
-				approved = df_tmp[df_tmp.Movie == movie]
+				approved = df_tmp[df_tmp.Movie == movie][['Movie', 'Intense']]
 				df = pd.concat([df, approved])
 				change_flg = 1
 
@@ -218,8 +218,8 @@ if action == '3':
 				change_flg = 1
 
 	if change_flg:
-		df.to_csv('Data/Movie List.csv')
-		df_tmp.to_csv('Data/Suggested Movies.csv')
+		df.to_csv('Data/Movie List.csv', index=False)
+		df_tmp.to_csv('Data/Suggested Movies.csv', index=False)
 		print('Suggested Movies and Movie List updated.')
 
 if action == '4':
@@ -245,4 +245,4 @@ if action == '4':
 		except:
 			pass
 
-	df.to_csv('Data/Movie List.csv')
+	df.to_csv('Data/Movie List.csv', index=False)
